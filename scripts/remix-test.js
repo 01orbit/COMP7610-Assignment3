@@ -163,7 +163,7 @@ async function runAssignmentTests({ ethers, provider, readArtifact, imageURI = T
     equal(await cpt.isMember(c), true, "C approved");
     equal(await cpt.membershipApplications(b), false, "application cleared");
     await reverts(cpt, B, "applyForMembership", [], "Already a member");
-    await balances([0, 50, 50, 900, 1000]);
+    await balances([0, 5, 5, 990, 1000]);
   });
   await step("Non-administrators cannot issue, distribute or deduct points", async () => {
     for (const method of ["mintPoints", "distributePoints", "adminBurnPoints", "adminRecoverPoints"]) {
@@ -172,7 +172,7 @@ async function runAssignmentTests({ ethers, provider, readArtifact, imageURI = T
     await reverts(cpt, A, "adminBurnPoints", [b, points(100)], "Insufficient points");
     await reverts(cpt, A, "adminRecoverPoints", [b, points(100)], "Insufficient points");
     await reverts(cpt, A, "adminRecoverPoints", [zero, 0], "Invalid account");
-    await balances([0, 50, 50, 900, 1000]);
+    await balances([0, 5, 5, 990, 1000]);
   });
   await step("Only an administrator can issue an NFT to a current member", async () => {
     await reverts(nft, B, "mintMemo", [b], "Not a club administrator");
@@ -182,7 +182,7 @@ async function runAssignmentTests({ ethers, provider, readArtifact, imageURI = T
   });
   await step("Fund administrator, reject missing allowance, approve and issue NFT #1", async () => {
     await send(cpt, A, "distributePoints", a, points(100));
-    await balances([100, 50, 50, 800, 1000]);
+    await balances([100, 5, 5, 890, 1000]);
     await reverts(nft, A, "mintMemo", [b], "ERC20InsufficientAllowance");
     equal(await nft.nextTokenId(), 1, "failed issuance leaves ID unchanged");
     await send(cpt, A, "approve", N, points(100));
@@ -193,7 +193,7 @@ async function runAssignmentTests({ ethers, provider, readArtifact, imageURI = T
     metadata(await nft.tokenURI(1), 1);
     equal(await nft.balanceOf(b), 1, "B NFT balance");
     equal(await cpt.allowance(a, N), 0, "allowance consumed");
-    await balances([0, 50, 50, 800, 900], b);
+    await balances([0, 5, 5, 890, 900], b);
   });
   await step("Administrator cannot take a member's NFT; only owner may list", async () => {
     await reverts(nft, A, "transferFrom", [b, a, 1], "ERC721InsufficientApproval");
@@ -202,27 +202,27 @@ async function runAssignmentTests({ ethers, provider, readArtifact, imageURI = T
     equal(await nft.ownerOf(1), b, "failed operations preserve ownership");
   });
   await step("Treasury distribution preserves supply", async () => {
-    await send(cpt, A, "distributePoints", b, points(100));
-    await balances([0, 150, 50, 700, 900], b);
+    await send(cpt, A, "distributePoints", b, points(145));
+    await balances([0, 150, 5, 745, 900], b);
   });
   await step("Minting CPT increases supply", async () => {
     await send(cpt, A, "mintPoints", b, points(20));
-    await balances([0, 170, 50, 700, 920], b);
+    await balances([0, 170, 5, 745, 920], b);
   });
   await step("Administrator burn reduces supply", async () => {
     event(await send(cpt, A, "adminBurnPoints", b, points(10)), cpt, "PointsBurnedByAdmin", [b, points(10)]);
-    await balances([0, 160, 50, 700, 910], b);
+    await balances([0, 160, 5, 745, 910], b);
   });
   await step("Administrator recovery needs no allowance and preserves supply/membership/NFT", async () => {
     equal(await cpt.allowance(b, a), 0, "no recovery approval");
     event(await send(cpt, A, "adminRecoverPoints", b, points(20)), cpt, "PointsRecoveredByAdmin", [b, points(20)]);
     equal(await cpt.isMember(b), true, "recovery preserves membership");
-    await balances([0, 140, 50, 720, 910], b);
+    await balances([0, 140, 5, 765, 910], b);
   });
   await step("CPT transfer between members and buyer funding", async () => {
     await send(cpt, B, "transfer", c, points(10));
-    await balances([0, 130, 60, 720, 910], b);
-    await send(cpt, A, "distributePoints", c, points(20));
+    await balances([0, 130, 15, 765, 910], b);
+    await send(cpt, A, "distributePoints", c, points(65));
     await balances([0, 130, 80, 700, 910], b);
   });
   await step("Listing escrows NFT and prevents self-purchase/unauthorized cancellation", async () => {
@@ -296,7 +296,7 @@ async function runAssignmentTests({ ethers, provider, readArtifact, imageURI = T
     await reverts(other.nft, A, "mintMemo", [b], "ERC20InsufficientBalance");
     equal(await other.nft.nextTokenId(), 1, "failed payment preserves ID");
     equal(await other.cpt.allowance(a, other.N), points(100), "failed payment preserves allowance");
-    equal(await other.cpt.balanceOf(b), points(50), "recipient not charged");
+    equal(await other.cpt.balanceOf(b), points(5), "recipient not charged");
   });
   await step("Current administrator grants/revocations affect NFT issuance", async () => {
     const role = await other.cpt.ADMIN_ROLE();
@@ -317,12 +317,12 @@ async function runAssignmentTests({ ethers, provider, readArtifact, imageURI = T
     await reverts(other.nft, C, "buyMemo", [1], "ERC20InsufficientBalance");
     equal(await other.nft.ownerOf(1), other.N, "escrow preserved");
     equal((await other.nft.listings(1)).seller, b, "seller preserved");
-    equal(await other.cpt.balanceOf(c), points(50), "buyer balance preserved");
+    equal(await other.cpt.balanceOf(c), points(5), "buyer balance preserved");
     equal(await other.cpt.allowance(c, other.N), points(80), "buyer allowance preserved");
   });
   await step("A former member may sell their NFT and receive CPT after withdrawal", async () => {
     await send(other.cpt, B, "withdrawFromClub");
-    await send(other.cpt, A, "distributePoints", c, points(30));
+    await send(other.cpt, A, "distributePoints", c, points(75));
     await send(other.nft, C, "buyMemo", 1);
     equal(await other.cpt.isMember(b), false, "seller remains a former member");
     equal(await other.cpt.balanceOf(b), points(80), "former member receives sale price");

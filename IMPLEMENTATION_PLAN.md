@@ -6,7 +6,7 @@ Deliver a small, reproducible HKU Drone Club membership system that can be compi
 
 ## Contract design
 
-`CPT.sol` uses OpenZeppelin ERC20, ERC20Burnable and AccessControl. The initial 1,000 CPT are held by the CPT contract as a treasury. A user applies for membership; an administrator approves the application and transfers 50 welcome CPT from the treasury. The administrator can mint additional CPT, distribute treasury CPT, burn a user's CPT with `adminBurnPoints`, or recover it to the treasury with `adminRecoverPoints`. A member's `withdrawFromClub` burns all of that user's remaining CPT and clears membership. Ordinary ERC20 transfers remain available.
+`CPT.sol` uses OpenZeppelin ERC20, ERC20Burnable and AccessControl. The initial 1,000 CPT are held by the CPT contract as a treasury. A user applies for membership; an administrator approves the application and transfers 5 welcome CPT from the treasury. The administrator can mint additional CPT, distribute treasury CPT, burn a user's CPT with `adminBurnPoints`, or recover it to the treasury with `adminRecoverPoints`. A member's `withdrawFromClub` burns all of that user's remaining CPT and clears membership. Ordinary ERC20 transfers remain available.
 
 `CampusMemo.sol` uses ERC721 and ReentrancyGuard. Only an address with CPT's current `ADMIN_ROLE` can issue IDs 1–10 to current members. The administrator must approve 100 CPT to the NFT contract; that amount is burned from the administrator. There is no NFT burn or administrative recovery. Owners may transfer directly or list an NFT in escrow and sell it for CPT. Membership is not checked for listing, buying or ordinary transfer, so an NFT remains with a former member and can still be traded.
 

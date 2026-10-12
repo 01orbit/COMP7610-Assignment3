@@ -22,7 +22,7 @@ contract CPT is ERC20, ERC20Burnable, AccessControl {
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
     uint256 public constant INITIAL_SUPPLY = 1_000 ether;
-    uint256 public constant WELCOME_POINTS = 50 ether;
+    uint256 public constant WELCOME_POINTS = 5 ether;
 
     mapping(address => bool) public isMember;
     mapping(address => bool) public membershipApplications;

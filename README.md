@@ -8,6 +8,7 @@
 - `contracts/CampusMemo.sol`：管理员发行 NFT、拥有者转让、CPT 挂单交易，以及链上动态 NFT JSON。
 - `scripts/deploy.js`：Sepolia 部署脚本，只需要一个固定版本 GitHub 图片 URL。
 - `scripts/remix-test.js`：可直接在 Remix VM 运行的自动测试脚本，覆盖 22 组场景。
+- `scripts/remix-sepolia-check.js`：填写已部署地址后，在 MetaMask 连接的 Sepolia 上运行，只读检查初始或演示后的状态并解码已有 NFT，不发交易。
 - `scripts/prepare-remix.js`：把合约和测试复制到 `output/remix/`，并补上 Remix 可识别的 OpenZeppelin 版本路径。
 - `scripts/decode-token-uri.js`：把 `tokenURI()` 返回的 data URI 解码为可读 JSON。
 - `test/assignment3.js`：Hardhat 单元测试。
@@ -39,6 +40,8 @@ npm run remix:prepare
 ```
 
 Hardhat 测试使用本地 EVM，不访问 GitHub。Remix 测试也使用 Remix VM，脚本会在开始时拒绝 Sepolia 和钱包连接网络，避免误操作真实资产。运行测试后，脚本应报告 22 个测试组、超过 200 项断言和 4 次隔离部署。
+
+网页版 Remix + MetaMask 的完整流程见 [部署与验证手册](REMIX_DEPLOYMENT_GUIDE.md)，从上传 GitHub 图片开始。Sepolia 检查使用单独的 `remix-sepolia-check.js`，在运行前填写顶部 CONFIG；该脚本与完整 VM 功能测试的用途不同。
 
 可以用下面的命令解码任意一条 `tokenURI()` 结果：
 

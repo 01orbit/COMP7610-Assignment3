@@ -3,7 +3,10 @@ const path = require("node:path");
 
 const root = path.join(__dirname, "..");
 const output = path.join(root, "output", "remix");
-const files = ["contracts/CPT.sol", "contracts/CampusMemo.sol", "scripts/remix-test.js"];
+const files = [
+  "contracts/CPT.sol", "contracts/CampusMemo.sol",
+  "scripts/remix-test.js", "scripts/remix-sepolia-check.js"
+];
 for (const file of files) {
   let content = fs.readFileSync(path.join(root, file), "utf8");
   if (file.endsWith(".sol")) {
@@ -13,5 +16,5 @@ for (const file of files) {
   fs.mkdirSync(path.dirname(target), { recursive: true });
   fs.writeFileSync(target, content);
 }
-console.log(`Prepared ${output}: version-pinned contracts and the Remix test script.`);
-console.log("Copy/open these files in Remix, compile both contracts, select Remix VM, then run scripts/remix-test.js.");
+console.log(`Prepared ${output}: version-pinned contracts, the VM test script and the Sepolia read-only checker.`);
+console.log("Full tests: Remix VM + scripts/remix-test.js. Existing Sepolia contracts: fill CONFIG in scripts/remix-sepolia-check.js.");

@@ -19,7 +19,7 @@
 \textbf{System design.}
 \code{CPT} is an OpenZeppelin ERC-20 token with 18 decimals. Deployment mints exactly 1,000 CPT to the CPT contract as the club treasury. Only \code{ADMIN_ROLE} can call \code{mintPoints} (new points), \code{distributePoints} (treasury points), or \code{adminBurnPoints} (permanently deduct a specified amount from a user's balance). Standard \code{transfer}, \code{approve}, and \code{transferFrom} remain available to users.
 
-Members call \code{applyForMembership}; an administrator calls \code{approveMembership}, which grants membership and transfers a fixed 50 CPT welcome allocation from the treasury. A member can call \code{withdrawFromClub} to burn all remaining CPT and revoke membership. Existing NFTs are not destroyed. This is the additional custom withdrawal function.
+Members call \code{applyForMembership}; an administrator calls \code{approveMembership}, which grants membership and transfers a fixed 5 CPT welcome allocation from the treasury. A member can call \code{withdrawFromClub} to burn all remaining CPT and revoke membership. Existing NFTs are not destroyed. This is the additional custom withdrawal function.
 
 Administrators can also call \code{adminRecoverPoints(account, amount)} to return existing CPT to the contract treasury without user approval. Recovery preserves total supply, membership, and NFT ownership; recovered CPT can be redistributed.
 
@@ -51,8 +51,8 @@ export NFT_IMAGE_URL="<full commit-pinned GitHub Raw image URL>"
 \begin{enumerate}
   \item Open the two Solidity files in Remix (OpenZeppelin 5.0.2); compile with Solidity 0.8.24, optimizer 200 and EVM paris, use a supported wallet connection (or Browser Extension in Remix web), and confirm Sepolia.
   \item Deploy \code{CPT} with the deployer's address. Deploy \code{CampusMemo} with the CPT address and the verified GitHub Raw image URL.
-  \item As a student account call \code{applyForMembership}; as the administrator call \code{approveMembership(student)}. Confirm \code{isMember=true} and a 50 CPT balance.
-  \item As administrator call \code{adminRecoverPoints(student, 20000000000000000000)} to recover 20 CPT. Confirm the student's balance decreases by 20, treasury balance increases by 20, and total supply and membership are unchanged. Non-admin calls must revert.
+  \item As a student account call \code{applyForMembership}; as the administrator call \code{approveMembership(student)}. Confirm \code{isMember=true} and a 5 CPT balance.
+  \item As administrator call \code{adminRecoverPoints(student, 2000000000000000000)} to recover 2 CPT. Confirm the student's balance decreases by 2, treasury balance increases by 2, and total supply and membership are unchanged. Non-admin calls must revert.
   \item As administrator distribute 100 CPT to the admin account. In CPT call \code{approve} with the NFT address and amount \code{100000000000000000000}, then in CampusMemo call \code{mintMemo(student)}. Confirm ordinary-member minting reverts and the administrator pays 100 CPT. Confirm \code{ownerOf(1)} and \code{tokenURI(1)}.
   \item From the student account call \code{transfer} to another account and \code{safeTransferFrom} for token 1. Confirm both new balances/owners.
   \item As the NFT owner call \code{listMemo(1, price)}. From a buyer account approve the Campus-Memo contract to spend that CPT amount, then call \code{buyMemo(1)}. Confirm CPT reaches the seller and \code{ownerOf(1)} becomes the buyer. A seller can use \code{cancelMemoListing(1)} before purchase.
@@ -69,6 +69,6 @@ Example token URI & \placeholder{paste complete tokenURI(1) data URI}\\
 Deployment transactions & \placeholder{paste transaction hashes or Etherscan links}
 \end{tabularx}
 
-\textbf{Screenshots to insert before submission:} (1) MetaMask showing Sepolia and the deployed contracts; (2) membership approval and 50 CPT balance; (3) CPT approval followed by NFT mint, \code{ownerOf(1)}, and \code{tokenURI(1)}; (4) withdrawal transaction, zero CPT balance, \code{isMember=false}, and unchanged \code{ownerOf(1)}. Rename this file to \code{FullName_UID_Assignment3_Report.tex} and export the same content as PDF after replacing every red placeholder.
+\textbf{Screenshots to insert before submission:} (1) MetaMask showing Sepolia and the deployed contracts; (2) membership approval and 5 CPT balance; (3) CPT approval followed by NFT mint, \code{ownerOf(1)}, and \code{tokenURI(1)}; (4) withdrawal transaction, zero CPT balance, \code{isMember=false}, and unchanged \code{ownerOf(1)}. Rename this file to \code{FullName_UID_Assignment3_Report.tex} and export the same content as PDF after replacing every red placeholder.
 
 \end{document}

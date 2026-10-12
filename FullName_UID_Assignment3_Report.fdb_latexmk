@@ -1,10 +1,10 @@
 # Fdb version 4
-["xdvipdfmx"] 1791809044.17237 "FullName_UID_Assignment3_Report.xdv" "FullName_UID_Assignment3_Report.pdf" "FullName_UID_Assignment3_Report" 1791809044.37427 0
-  "FullName_UID_Assignment3_Report.xdv" 1791809044.13715 60044 5f1300d0d0be06142c79b90752524216 "xelatex"
+["xdvipdfmx"] 1791810623.86235 "FullName_UID_Assignment3_Report.xdv" "FullName_UID_Assignment3_Report.pdf" "FullName_UID_Assignment3_Report" 1791810624.04541 0
+  "FullName_UID_Assignment3_Report.xdv" 1791810623.83169 59988 f12039a4c9ec6017f8f1508096f32a2e "xelatex"
   (generated)
   "FullName_UID_Assignment3_Report.pdf"
   (rewritten before read)
-["xelatex"] 1791809043.61471 "FullName_UID_Assignment3_Report.tex" "FullName_UID_Assignment3_Report.xdv" "FullName_UID_Assignment3_Report" 1791809044.37372 0
+["xelatex"] 1791810623.36909 "FullName_UID_Assignment3_Report.tex" "FullName_UID_Assignment3_Report.xdv" "FullName_UID_Assignment3_Report" 1791810624.04457 0
   "/etc/texmf/web2c/texmf.cnf" 1787327181.70483 475 c0e671620eb5563b2130f56340a5fde8 ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/zapfding/pzdr.tfm" 1136768653 1528 f853c4d1b4e0550255e02831fdc8496f ""
@@ -50,9 +50,9 @@
   "/usr/share/texlive/texmf-dist/web2c/texmf.cnf" 1769369718 41603 27f93b3067076450172040dcd57ca8b3 ""
   "/usr/share/texmf/web2c/texmf.cnf" 1769369718 41603 27f93b3067076450172040dcd57ca8b3 ""
   "/var/lib/texmf/web2c/xetex/xelatex.fmt" 1787327230 5950320 13eedd1f3bd943f91f9f0a5662e2e475 ""
-  "FullName_UID_Assignment3_Report.aux" 1791809044.13632 128 8ec89a09013e497d5b92563b73b0583f "xelatex"
-  "FullName_UID_Assignment3_Report.out" 1791809044.11897 0 d41d8cd98f00b204e9800998ecf8427e "xelatex"
-  "FullName_UID_Assignment3_Report.tex" 1791809043.41796 6996 5e15e3a4fcf31c8c8116bcf6543800b2 ""
+  "FullName_UID_Assignment3_Report.aux" 1791810623.83071 128 8ec89a09013e497d5b92563b73b0583f "xelatex"
+  "FullName_UID_Assignment3_Report.out" 1791810623.81383 0 d41d8cd98f00b204e9800998ecf8427e "xelatex"
+  "FullName_UID_Assignment3_Report.tex" 1791810623.15082 6989 0feec23c2312a1c9337f47c2b8b6a429 ""
   (generated)
   "FullName_UID_Assignment3_Report.aux"
   "FullName_UID_Assignment3_Report.log"

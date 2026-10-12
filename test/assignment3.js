@@ -3,7 +3,7 @@ const { ethers } = require("hardhat");
 
 describe("HKU Drone Club Assignment 3", function () {
   const initialSupply = ethers.parseEther("1000");
-  const welcomePoints = ethers.parseEther("50");
+  const welcomePoints = ethers.parseEther("5");
   const mintCost = ethers.parseEther("100");
   // Offline fixture: the image URL is never fetched by the tests.
   const imageURI = "https://raw.githubusercontent.com/example/campus-memo/0123456789abcdef0123456789abcdef01234567/campus-memo.png";
@@ -86,15 +86,15 @@ describe("HKU Drone Club Assignment 3", function () {
 
   it("supports standard CPT transfers between members", async function () {
     await onboard(alice);
-    await cpt.connect(alice).transfer(bob.address, ethers.parseEther("10"));
+    await cpt.connect(alice).transfer(bob.address, ethers.parseEther("1"));
 
-    expect(await cpt.balanceOf(bob.address)).to.equal(ethers.parseEther("10"));
-    expect(await cpt.balanceOf(alice.address)).to.equal(ethers.parseEther("40"));
+    expect(await cpt.balanceOf(bob.address)).to.equal(ethers.parseEther("1"));
+    expect(await cpt.balanceOf(alice.address)).to.equal(ethers.parseEther("4"));
   });
 
   it("lets only an administrator deduct CPT from a user's balance", async function () {
     await onboard(alice);
-    const deduction = ethers.parseEther("20");
+    const deduction = ethers.parseEther("2");
 
     await expect(cpt.adminBurnPoints(alice.address, deduction))
       .to.emit(cpt, "PointsBurnedByAdmin")
@@ -118,7 +118,7 @@ describe("HKU Drone Club Assignment 3", function () {
     await issueMemo(alice);
 
     const treasury = await cpt.getAddress();
-    const recovered = ethers.parseEther("20");
+    const recovered = ethers.parseEther("2");
     const treasuryBefore = await cpt.balanceOf(treasury);
     const supplyBefore = await cpt.totalSupply();
     const adminBalanceBefore = await cpt.balanceOf(deployer.address);
