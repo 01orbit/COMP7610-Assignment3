@@ -20,7 +20,9 @@
 
 Members call \code{applyForMembership}; an administrator calls \code{approveMembership}, which grants membership and transfers a fixed 50 CPT welcome allocation from the treasury. A member can call \code{withdrawFromClub} to burn all remaining CPT and revoke membership. Existing NFTs are not destroyed. This is the additional custom withdrawal function.
 
-\code{CampusMemo} is an ERC-721 collection named ``Campus-Memo''. Its maximum supply is 10 and minting costs 100 CPT. A member first approves the NFT contract for 100 CPT, then calls \code{mintMemo}; the contract calls CPT \code{burnFrom}, so the payment is removed from total supply. Token IDs start at 1 and \code{tokenURI(id)} is the IPFS base URI plus the token ID. An owner can call \code{listMemo(tokenId, price)} to escrow an NFT, while a buyer approves the marketplace for the CPT price and calls \code{buyMemo}; CPT is paid to the seller and the NFT is transferred to the buyer. The seller can cancel with \code{cancelMemoListing}.
+Administrators can also call \code{adminRecoverPoints(account, amount)} to return existing CPT to the contract treasury without user approval. Recovery preserves total supply, membership, and NFT ownership; recovered CPT can be redistributed.
+
+\code{CampusMemo} is an ERC-721 collection named ``Campus-Memo''. Its maximum supply is 10 and minting costs 100 CPT. Only CPT administrators can issue NFTs: the administrator approves 100 CPT and calls \code{mintMemo(memberAddress)}. The recipient must be a member; 100 CPT is burned from the administrator, while the recipient's balance is unchanged. There is no NFT burn or administrator recovery function. Token IDs start at 1 and \code{tokenURI(id)} is the IPFS base URI plus the token ID. An owner can call \code{listMemo(tokenId, price)} to escrow an NFT, while a buyer approves the marketplace for the CPT price and calls \code{buyMemo}; CPT is paid to the seller and the NFT is transferred to the buyer. The seller can cancel with \code{cancelMemoListing}.
 
 \textbf{Local verification.}
 \begin{verbatim}
@@ -28,7 +30,7 @@ npm install
 npm run compile
 npm test
 \end{verbatim}
-The test suite checks the initial treasury supply, administrator permissions, welcome points, CPT transfer, administrator CPT deduction, withdrawal burn, preservation of an already-owned NFT after withdrawal, NFT payment burn, NFT transfer, CPT NFT purchase, listing cancellation, URI generation, and rejection of the 11th NFT.
+The test suite checks the initial treasury supply, administrator permissions, welcome points, CPT transfer, administrator CPT deduction, withdrawal burn, preservation of an already-owned NFT after withdrawal, administrator-only NFT issuance and payment burn, NFT transfer, CPT NFT purchase, listing cancellation, URI generation, and rejection of the 11th NFT.
 
 \textbf{Sepolia deployment (Hardhat).}
 \begin{enumerate}
@@ -48,7 +50,8 @@ export NFT_BASE_URI="ipfs://<CID>/"
   \item Open the two Solidity files in Remix, compile with Solidity 0.8.24, choose ``Injected Provider -- MetaMask'', and confirm Sepolia.
   \item Deploy \code{CPT} with the deployer's address. Deploy \code{CampusMemo} with the CPT address and \code{ipfs://<CID>/}.
   \item As a student account call \code{applyForMembership}; as the administrator call \code{approveMembership(student)}. Confirm \code{isMember=true} and a 50 CPT balance.
-  \item As the administrator call \code{distributePoints(student, 100 CPT)}. The student calls \code{approve(CampusMemo, 100 CPT)}, then \code{mintMemo()}. Confirm \code{ownerOf(1)} and \code{tokenURI(1)}.
+  \item As administrator call \code{adminRecoverPoints(student, 20000000000000000000)} to recover 20 CPT. Confirm the student's balance decreases by 20, treasury balance increases by 20, and total supply and membership are unchanged. Non-admin calls must revert.
+  \item As administrator call \code{distributePoints(admin, 100 CPT)}, then CPT \code{approve(CampusMemo, 100000000000000000000)}, and CampusMemo \code{mintMemo(student)}. Confirm ordinary-member minting reverts and the administrator pays 100 CPT. Confirm \code{ownerOf(1)} and \code{tokenURI(1)}.
   \item From the student account call \code{transfer} to another account and \code{safeTransferFrom} for token 1. Confirm both new balances/owners.
   \item As the NFT owner call \code{listMemo(1, price)}. From a buyer account approve the Campus-Memo contract to spend that CPT amount, then call \code{buyMemo(1)}. Confirm CPT reaches the seller and \code{ownerOf(1)} becomes the buyer. A seller can use \code{cancelMemoListing(1)} before purchase.
   \item From the member account call \code{withdrawFromClub()}. Confirm the CPT balance is zero, \code{isMember=false}, the \code{MemberWithdrawn} event is emitted, and \code{ownerOf(1)} is still the former member (unless it was sold).

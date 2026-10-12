@@ -5,6 +5,8 @@ import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 interface ICPTMembership {
+    function ADMIN_ROLE() external view returns (bytes32);
+    function hasRole(bytes32 role, address account) external view returns (bool);
     function burnFrom(address account, uint256 amount) external;
     function isMember(address account) external view returns (bool);
     function transferFrom(address from, address to, uint256 amount)
@@ -14,7 +16,8 @@ interface ICPTMembership {
 
 /**
  * @title CampusMemo
- * @notice Limited-edition ERC-721 commemorative NFTs for club members.
+ * @notice Administrators issue limited-edition NFTs to members. Existing NFTs
+ * can be traded by their owners; there is no administrative recovery or burn.
  */
 contract CampusMemo is ERC721, ReentrancyGuard {
     uint256 public constant MAX_SUPPLY = 10;
@@ -31,7 +34,11 @@ contract CampusMemo is ERC721, ReentrancyGuard {
 
     mapping(uint256 => Listing) public listings;
 
-    event MemoMinted(address indexed minter, uint256 indexed tokenId);
+    event MemoMinted(
+        address indexed admin,
+        address indexed recipient,
+        uint256 indexed tokenId
+    );
     event MemoListed(
         address indexed seller,
         uint256 indexed tokenId,
@@ -53,18 +60,28 @@ contract CampusMemo is ERC721, ReentrancyGuard {
         _baseTokenURI = baseTokenURI_;
     }
 
-    function mintMemo() external nonReentrant {
+    /**
+     * @notice Issue a new NFT directly to a club member.
+     * @dev The caller must hold CPT's current ADMIN_ROLE and approve this
+     * contract to burn 100 CPT from the caller's own balance for each mint.
+     */
+    function mintMemo(address recipient) external nonReentrant {
+        require(
+            cpt.hasRole(cpt.ADMIN_ROLE(), msg.sender),
+            "Not a club administrator"
+        );
         require(nextTokenId <= MAX_SUPPLY, "Maximum supply reached");
-        require(cpt.isMember(msg.sender), "Not a club member");
+        require(recipient != address(0), "Invalid recipient");
+        require(cpt.isMember(recipient), "Recipient is not a club member");
 
-        // The caller must approve this contract for MINT_COST CPT first.
+        // The administrator pays; the recipient's CPT balance is unchanged.
         cpt.burnFrom(msg.sender, MINT_COST);
 
         uint256 tokenId = nextTokenId;
         nextTokenId++;
-        _safeMint(msg.sender, tokenId);
+        _safeMint(recipient, tokenId);
 
-        emit MemoMinted(msg.sender, tokenId);
+        emit MemoMinted(msg.sender, recipient, tokenId);
     }
 
     /**

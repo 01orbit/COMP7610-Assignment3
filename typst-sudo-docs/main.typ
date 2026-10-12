@@ -59,20 +59,21 @@ This document is written as an operator's guide. Follow the numbered steps in or
   ],
   funcs: [
     - Standard ERC-20 `transfer` remains available.
+    - Admin-only `adminRecoverPoints(account, amount)` returns CPT to treasury without user approval; supply stays constant.
     - A member's existing NFT is unaffected by withdrawal.
   ]
 )
 
 #adt-card(
   name: "Campus-Memo — limited NFT",
-  desc: [The ERC-721 collection has a hard cap of 10. A member must approve 100 CPT and call `mintMemo()`; the payment is burned through `burnFrom()`.],
+  desc: [Only CPT administrators call `mintMemo(memberAddress)` to issue an NFT to a member. The admin approves and pays 100 CPT, which is burned. Lifetime cap: 10; no NFT burn or admin recovery.],
   impl: [
     - Token IDs start at 1.
     - `tokenURI(id)` is the IPFS base URI plus the ID.
     - `safeTransferFrom()` supports ordinary NFT transfers.
   ],
   funcs: [
-    - Membership is checked before minting.
+    - Admin role and recipient membership are checked; the member pays no CPT.
     - Existing NFTs remain collectible after withdrawal.
     - `listMemo()` + `buyMemo()` exchange an escrowed NFT for CPT; `cancelMemoListing()` returns it.
   ]
@@ -88,7 +89,7 @@ npm run compile
 npm test
 ```
 
-The test suite covers the initial treasury, admin permissions, welcome points, CPT transfers, administrator CPT deduction, withdrawal burn, preservation of an NFT after withdrawal, NFT payment burn, NFT transfers, CPT NFT purchase, listing cancellation, URI generation, and rejection of the 11th NFT.
+The test suite covers the initial treasury, admin permissions, welcome points, CPT transfers, administrator CPT deduction, withdrawal burn, preservation of an NFT after withdrawal, administrator-only NFT issuance and payment burn, NFT transfers, CPT NFT purchase, listing cancellation, URI generation, and rejection of the 11th NFT.
 
 = Sepolia deployment
 
@@ -121,7 +122,7 @@ The test suite covers the initial treasury, admin permissions, welcome points, C
   "Deploy Campus-Memo",
   [Deploy `CampusMemo(cptAddress, "ipfs://CID/")` using the CPT address from Step 3.],
   [Record the Campus-Memo address. `MAX_SUPPLY()` is 10 and `MINT_COST()` is 100 CPT.],
-  [The NFT contract reads membership from CPT and burns the approved payment during minting.]
+  [The NFT checks CPT admin roles and recipient membership, then burns the admin's approved payment.]
 )
 
 #step(
@@ -135,7 +136,7 @@ The test suite covers the initial treasury, admin permissions, welcome points, C
 #step(
   6,
   "Mint and transfer",
-  [The member calls `approve(campusMemoAddress, 100 CPT)`, then `mintMemo()`. Test `transfer` and `safeTransferFrom` with a second account. An owner can call `listMemo(1, price)`; a buyer approves that CPT amount and calls `buyMemo(1)`.],
+  [The admin obtains 100 CPT, calls CPT `approve(campusMemoAddress, 100000000000000000000)`, then NFT `mintMemo(memberAddress)`. Test `transfer` and `safeTransferFrom` with a second account. An owner can call `listMemo(1, price)`; a buyer approves that CPT amount and calls `buyMemo(1)`.],
   [The member owns token 1, a purchase pays CPT to the seller and changes `ownerOf(1)`, and `cancelMemoListing(1)` returns an unsold token.],
   [CPT is a transferable resource; the NFT is a transferable, individually identified, and tradeable commemorative object.]
 )
@@ -150,13 +151,16 @@ The test suite covers the initial treasury, admin permissions, welcome points, C
 
 = Verification checklist
 
+To test recovery, as admin call `adminRecoverPoints(user, 20000000000000000000)` on a user holding at least 20 CPT. The user's balance decreases by 20 and treasury balance increases by 20; `totalSupply()`, membership, and NFT ownership are unchanged. Check `PointsRecoveredByAdmin` and confirm a non-admin call reverts. Recovered CPT can be redistributed with `distributePoints()`.
+
 #table(
   columns: (1.35fr, 1.25fr, 2.7fr),
   table.header[*Check*][*Expected state*][*Evidence to capture*],
   [Initial supply], [1,000 CPT], [`totalSupply()` and treasury `balanceOf`],
   [Welcome allocation], [50 CPT], [`MembershipApproved` and member balance],
-  [NFT payment], [100 CPT burned], [`totalSupply()` before/after `mintMemo()`],
-  [NFT scarcity], [No token 11], [reverted `mintMemo()` transaction],
+  [NFT issuance], [Admin only; member recipient], [Member mint reverts; `MemoMinted(admin, recipient, id)`],
+  [NFT payment], [100 admin CPT burned], [`totalSupply()` before/after `mintMemo(memberAddress)`],
+  [NFT scarcity], [No token 11], [reverted `mintMemo(memberAddress)` transaction],
   [Exit policy], [CPT burned; NFT retained], [`isMember=false`, zero CPT, unchanged `ownerOf(1)`],
   [Metadata], [Correct IPFS URI], [`tokenURI(1)` and browser/IPFS check],
 )
@@ -170,4 +174,4 @@ The test suite covers the initial treasury, admin permissions, welcome points, C
 - Example `tokenURI(1)`: `REPLACE_WITH_TOKEN_URI`
 - Student name and UID: `REPLACE_WITH_FULL_NAME_AND_UID`
 
-Keep the screenshots for MetaMask network selection, deployed contracts, member approval, NFT minting, transfers, and withdrawal with unchanged `ownerOf(1)`. This file is an additional Typst version; the existing LaTeX report remains in the project unchanged.
+Keep the screenshots for MetaMask network selection, deployed contracts, member approval, NFT minting, transfers, and withdrawal with unchanged `ownerOf(1)`. This file is an additional Typst version; the existing LaTeX source is retained alongside it.

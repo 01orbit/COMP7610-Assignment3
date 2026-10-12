@@ -13,6 +13,7 @@ import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
  * Administrators can distribute treasury points and mint additional points.
  * Administrators can also remove a specified amount of CPT from a user's
  * balance when an administrative correction or penalty is required.
+ * Removed points can be burned or recovered to the club treasury for reuse.
  * Members can apply for membership, and an administrator approves the
  * application with a fixed welcome allocation. Members can leave by burning
  * all of their remaining CPT.
@@ -32,6 +33,7 @@ contract CPT is ERC20, ERC20Burnable, AccessControl {
     event PointsDistributed(address indexed recipient, uint256 amount);
     event PointsMinted(address indexed recipient, uint256 amount);
     event PointsBurnedByAdmin(address indexed account, uint256 amount);
+    event PointsRecoveredByAdmin(address indexed account, uint256 amount);
 
     constructor(address initialAdmin) ERC20("Club Point Token", "CPT") {
         require(initialAdmin != address(0), "Invalid admin");
@@ -106,9 +108,25 @@ contract CPT is ERC20, ERC20Burnable, AccessControl {
     }
 
     /**
+     * @notice Return CPT from a user's balance to the club treasury for reuse.
+     * @dev Administrator-only; no allowance is required. Total supply and
+     * membership are unchanged, and the administrator does not receive CPT.
+     */
+    function adminRecoverPoints(address account, uint256 amount)
+        external
+        onlyRole(ADMIN_ROLE)
+    {
+        require(account != address(0), "Invalid account");
+        require(balanceOf(account) >= amount, "Insufficient points");
+
+        _transfer(account, address(this), amount);
+        emit PointsRecoveredByAdmin(account, amount);
+    }
+
+    /**
      * @notice Leave the club and permanently burn all CPT held by the caller.
-     * Existing NFTs are not affected, but the caller can no longer mint new
-     * Campus-Memo NFTs until they submit and receive a new membership approval.
+     * Existing NFTs are not affected, but the caller cannot receive newly
+     * issued Campus-Memo NFTs until their membership is approved again.
      */
     function withdrawFromClub() external {
         require(isMember[msg.sender], "Not a member");
