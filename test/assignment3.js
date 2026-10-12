@@ -5,6 +5,8 @@ describe("HKU Drone Club Assignment 3", function () {
   const initialSupply = ethers.parseEther("1000");
   const welcomePoints = ethers.parseEther("50");
   const mintCost = ethers.parseEther("100");
+  // Offline fixture: the image URL is never fetched by the tests.
+  const imageURI = "https://raw.githubusercontent.com/example/campus-memo/0123456789abcdef0123456789abcdef01234567/campus-memo.png";
 
   let cpt;
   let campusMemo;
@@ -24,7 +26,7 @@ describe("HKU Drone Club Assignment 3", function () {
     const CampusMemo = await ethers.getContractFactory("CampusMemo");
     campusMemo = await CampusMemo.deploy(
       await cpt.getAddress(),
-      "ipfs://example-cid/"
+      imageURI
     );
     await campusMemo.waitForDeployment();
   });
@@ -43,6 +45,26 @@ describe("HKU Drone Club Assignment 3", function () {
   it("mints the initial 1,000 CPT into the club treasury", async function () {
     expect(await cpt.totalSupply()).to.equal(initialSupply);
     expect(await cpt.balanceOf(await cpt.getAddress())).to.equal(initialSupply);
+  });
+
+  it("rejects metadata queries for NFTs that have not been issued", async function () {
+    for (const tokenId of [0, 1, 10, 11]) {
+      await expect(campusMemo.tokenURI(tokenId))
+        .to.be.revertedWithCustomError(campusMemo, "ERC721NonexistentToken")
+        .withArgs(tokenId);
+    }
+    await onboard(alice);
+    await issueMemo(alice);
+    await expect(campusMemo.tokenURI(2))
+      .to.be.revertedWithCustomError(campusMemo, "ERC721NonexistentToken")
+      .withArgs(2);
+  });
+
+  it("rejects an empty or JSON-breaking image URI at deployment", async function () {
+    const CampusMemo = await ethers.getContractFactory("CampusMemo");
+    await expect(CampusMemo.deploy(await cpt.getAddress(), "")).to.be.revertedWith("Invalid image URI");
+    await expect(CampusMemo.deploy(await cpt.getAddress(), "https://example.com/\"bad.png")).to.be.revertedWith("Invalid image URI");
+    await expect(CampusMemo.deploy(await cpt.getAddress(), "https://example.com/\\bad.png")).to.be.revertedWith("Invalid image URI");
   });
 
   it("lets an administrator approve a member and issue welcome points", async function () {
@@ -156,12 +178,14 @@ describe("HKU Drone Club Assignment 3", function () {
   it("keeps a commemorative NFT with a member after withdrawal", async function () {
     await onboard(alice);
     await issueMemo(alice);
+    const uriBefore = await campusMemo.tokenURI(1);
 
     await cpt.connect(alice).withdrawFromClub();
 
     expect(await cpt.isMember(alice.address)).to.equal(false);
     expect(await cpt.balanceOf(alice.address)).to.equal(0);
     expect(await campusMemo.ownerOf(1)).to.equal(alice.address);
+    expect(await campusMemo.tokenURI(1)).to.equal(uriBefore);
   });
 
   it("burns the administrator's 100 CPT when issuing an NFT to a member", async function () {
@@ -176,7 +200,15 @@ describe("HKU Drone Club Assignment 3", function () {
     expect(await campusMemo.ownerOf(1)).to.equal(alice.address);
     expect(await cpt.balanceOf(alice.address)).to.equal(welcomePoints);
     expect(await cpt.totalSupply()).to.equal(initialSupply - mintCost);
-    expect(await campusMemo.tokenURI(1)).to.equal("ipfs://example-cid/1");
+    const uri = await campusMemo.tokenURI(1);
+    expect(uri).to.match(/^data:application\/json;base64,/);
+    const metadata = JSON.parse(Buffer.from(uri.split(",")[1], "base64").toString("utf8"));
+    expect(metadata).to.deep.equal({
+      name: "Campus-Memo #1",
+      description: "A limited-edition commemorative NFT of the HKU Drone Club.",
+      image: imageURI,
+      attributes: [{ trait_type: "Edition", value: 1 }]
+    });
   });
 
   it("rejects NFT minting by an ordinary member", async function () {
@@ -233,9 +265,11 @@ describe("HKU Drone Club Assignment 3", function () {
     await cpt.distributePoints(deployer.address, mintCost);
     await cpt.approve(await campusMemo.getAddress(), mintCost);
     await campusMemo.mintMemo(alice.address);
+    const uriBefore = await campusMemo.tokenURI(1);
 
     await campusMemo.connect(alice).safeTransferFrom(alice.address, bob.address, 1);
     expect(await campusMemo.ownerOf(1)).to.equal(bob.address);
+    expect(await campusMemo.tokenURI(1)).to.equal(uriBefore);
   });
 
   it("does not let administrators take an issued NFT without owner approval", async function () {
@@ -310,6 +344,11 @@ describe("HKU Drone Club Assignment 3", function () {
     }
 
     expect(await campusMemo.totalMinted()).to.equal(10);
+    const uri = await campusMemo.tokenURI(10);
+    const metadata = JSON.parse(Buffer.from(uri.split(",")[1], "base64").toString("utf8"));
+    expect(metadata.name).to.equal("Campus-Memo #10");
+    expect(metadata.image).to.equal(imageURI);
+    expect(metadata.attributes[0].value).to.equal(10);
 
     const eleventh = extraAccounts[8];
     await onboard(eleventh);

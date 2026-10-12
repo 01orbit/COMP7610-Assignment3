@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999997 (TeX Live 2025/Debian) (preloaded format=xelatex 2026.8.21)  12 OCT 2026 16:37
+This is XeTeX, Version 3.141592653-2.6-0.999997 (TeX Live 2025/Debian) (preloaded format=xelatex 2026.8.21)  12 OCT 2026 20:44
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -212,34 +212,29 @@ File: l3backend-xetex.def 2025-10-09 L3 backend support: XeTeX
 \g__graphics_track_int=\count303
 \g__pdfannot_backend_int=\count304
 \g__pdfannot_backend_link_int=\count305
-)
-
-LaTeX Warning: Unused global option(s):
-    [9pt].
-
-(./FullName_UID_Assignment3_Report.aux)
+) (./FullName_UID_Assignment3_Report.aux)
 \openout1 = `FullName_UID_Assignment3_Report.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 11.
-LaTeX Font Info:    ... okay on input line 11.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 11.
-LaTeX Font Info:    ... okay on input line 11.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 11.
-LaTeX Font Info:    ... okay on input line 11.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 11.
-LaTeX Font Info:    ... okay on input line 11.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 11.
-LaTeX Font Info:    ... okay on input line 11.
-LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 11.
-LaTeX Font Info:    ... okay on input line 11.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 11.
-LaTeX Font Info:    ... okay on input line 11.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 11.
-LaTeX Font Info:    ... okay on input line 11.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 11.
-LaTeX Font Info:    ... okay on input line 11.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 11.
-LaTeX Font Info:    ... okay on input line 11.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 12.
+LaTeX Font Info:    ... okay on input line 12.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 12.
+LaTeX Font Info:    ... okay on input line 12.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 12.
+LaTeX Font Info:    ... okay on input line 12.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 12.
+LaTeX Font Info:    ... okay on input line 12.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 12.
+LaTeX Font Info:    ... okay on input line 12.
+LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 12.
+LaTeX Font Info:    ... okay on input line 12.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 12.
+LaTeX Font Info:    ... okay on input line 12.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 12.
+LaTeX Font Info:    ... okay on input line 12.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 12.
+LaTeX Font Info:    ... okay on input line 12.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 12.
+LaTeX Font Info:    ... okay on input line 12.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: xetex
@@ -275,17 +270,12 @@ LaTeX Font Info:    ... okay on input line 11.
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-Package hyperref Info: Link coloring ON on input line 11.
+Package hyperref Info: Link coloring ON on input line 12.
 (./FullName_UID_Assignment3_Report.out) (./FullName_UID_Assignment3_Report.out)
 \@outlinefile=\write3
 \openout3 = `FullName_UID_Assignment3_Report.out'.
 
-
-Overfull \hbox (31.87386pt too wide) in paragraph at lines 54--55
-[]\TU/lmr/m/n/10 As administrator call \TU/lmtt/m/n/10 distributePoints(admin, 100 CPT)\TU/lmr/m/n/10 , then CPT \TU/lmtt/m/n/10 approve(CampusMemo, 100000000000000000000)\TU/lmr/m/n/10 ,
- []
-
-[1
+ [1
 
 ] [2] (./FullName_UID_Assignment3_Report.aux)
  ***********
@@ -296,12 +286,12 @@ Package rerunfilecheck Info: File `FullName_UID_Assignment3_Report.out' has not 
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
  ) 
 Here is how much of TeX's memory you used:
- 9186 strings out of 468173
- 142743 string characters out of 5435520
- 593978 words of memory out of 5000000
- 37842 multiletter control sequences out of 15000+600000
+ 9185 strings out of 468173
+ 142737 string characters out of 5435520
+ 583979 words of memory out of 5000000
+ 37841 multiletter control sequences out of 15000+600000
  628129 words of font info for 47 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
- 72i,8n,79p,831b,328s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 72i,8n,79p,987b,328s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on FullName_UID_Assignment3_Report.xdv (2 pages, 53328 bytes).
+Output written on FullName_UID_Assignment3_Report.xdv (2 pages, 60044 bytes).

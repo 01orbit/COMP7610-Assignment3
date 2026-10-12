@@ -3,6 +3,8 @@ pragma solidity ^0.8.24;
 
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
 
 interface ICPTMembership {
     function ADMIN_ROLE() external view returns (bytes32);
@@ -24,7 +26,8 @@ contract CampusMemo is ERC721, ReentrancyGuard {
     uint256 public constant MINT_COST = 100 ether;
 
     ICPTMembership public immutable cpt;
-    string private _baseTokenURI;
+    /** @dev One stable image is stored off-chain; each JSON document is generated on-chain. */
+    string public imageURI;
     uint256 public nextTokenId = 1;
 
     struct Listing {
@@ -52,12 +55,13 @@ contract CampusMemo is ERC721, ReentrancyGuard {
     );
     event MemoListingCancelled(address indexed seller, uint256 indexed tokenId);
 
-    constructor(address cptAddress, string memory baseTokenURI_)
+    constructor(address cptAddress, string memory imageURI_)
         ERC721("Campus-Memo", "CMEMO")
     {
         require(cptAddress != address(0), "Invalid CPT address");
+        require(_isSafeImageURI(imageURI_), "Invalid image URI");
         cpt = ICPTMembership(cptAddress);
-        _baseTokenURI = baseTokenURI_;
+        imageURI = imageURI_;
     }
 
     /**
@@ -143,7 +147,53 @@ contract CampusMemo is ERC721, ReentrancyGuard {
         return nextTokenId - 1;
     }
 
-    function _baseURI() internal view override returns (string memory) {
-        return _baseTokenURI;
+    /**
+     * @notice Return a self-contained, base64-encoded JSON metadata document.
+     * @dev The image itself stays in a public GitHub repository. Keeping the
+     * JSON here avoids maintaining ten nearly identical external files while
+     * preserving stable metadata after transfers or club withdrawal.
+     */
+    function tokenURI(uint256 tokenId)
+        public
+        view
+        override
+        returns (string memory)
+    {
+        _requireOwned(tokenId);
+        string memory json = string.concat(
+            '{"name":"Campus-Memo #',
+            Strings.toString(tokenId),
+            '","description":"A limited-edition commemorative NFT of the HKU Drone Club.",',
+            '"image":"',
+            imageURI,
+            '","attributes":[{"trait_type":"Edition","value":',
+            Strings.toString(tokenId),
+            '}]}'
+        );
+        return string.concat(
+            "data:application/json;base64,",
+            Base64.encode(bytes(json))
+        );
+    }
+
+    /**
+     * @dev The JSON builder intentionally accepts URI schemes such as https://,
+     * ipfs:// and ar://. Printable URI characters are enough for this course
+     * project and prevent quotes, backslashes, and control bytes from breaking
+     * the generated JSON string.
+     */
+    function _isSafeImageURI(string memory candidate)
+        private
+        pure
+        returns (bool)
+    {
+        bytes memory value = bytes(candidate);
+        if (value.length == 0) return false;
+        for (uint256 i = 0; i < value.length; i++) {
+            uint8 character = uint8(value[i]);
+            if (character < 0x21 || character > 0x7e) return false;
+            if (character == 0x22 || character == 0x5c) return false;
+        }
+        return true;
     }
 }

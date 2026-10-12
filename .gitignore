@@ -1,7 +1,7 @@
 node_modules/
-.tools/
 artifacts/
 cache/
+output/remix/
 coverage/
 .env
 output/pdf/*.aux

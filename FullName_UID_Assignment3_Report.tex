@@ -1,9 +1,10 @@
-\documentclass[9pt,a4paper]{article}
+\documentclass[10pt,a4paper]{article}
 \usepackage[margin=1.45cm]{geometry}
 \usepackage{booktabs,tabularx,array,enumitem,xcolor,hyperref}
 \hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{2.5pt}
+\setlength{\emergencystretch}{2em}
 \setlist{nosep,leftmargin=*}
 \newcommand{\code}[1]{\texttt{\detokenize{#1}}}
 \newcommand{\placeholder}[1]{\textcolor{red}{[REPLACE: #1]}}
@@ -22,7 +23,7 @@ Members call \code{applyForMembership}; an administrator calls \code{approveMemb
 
 Administrators can also call \code{adminRecoverPoints(account, amount)} to return existing CPT to the contract treasury without user approval. Recovery preserves total supply, membership, and NFT ownership; recovered CPT can be redistributed.
 
-\code{CampusMemo} is an ERC-721 collection named ``Campus-Memo''. Its maximum supply is 10 and minting costs 100 CPT. Only CPT administrators can issue NFTs: the administrator approves 100 CPT and calls \code{mintMemo(memberAddress)}. The recipient must be a member; 100 CPT is burned from the administrator, while the recipient's balance is unchanged. There is no NFT burn or administrator recovery function. Token IDs start at 1 and \code{tokenURI(id)} is the IPFS base URI plus the token ID. An owner can call \code{listMemo(tokenId, price)} to escrow an NFT, while a buyer approves the marketplace for the CPT price and calls \code{buyMemo}; CPT is paid to the seller and the NFT is transferred to the buyer. The seller can cancel with \code{cancelMemoListing}.
+\code{CampusMemo} is an ERC-721 collection named ``Campus-Memo''. Its maximum supply is 10 and minting costs 100 CPT. Only CPT administrators can issue NFTs: the administrator approves 100 CPT and calls \code{mintMemo(memberAddress)}. The recipient must be a member; 100 CPT is burned from the administrator, while the recipient's balance is unchanged. There is no NFT burn or administrator recovery function. Token IDs start at 1. The constructor stores one commit-pinned GitHub Raw image URL, and \code{tokenURI(id)} generates the JSON on-chain and returns a \code{data:application/json;base64,...} URI. No Gist or external JSON files are required. An owner can call \code{listMemo(tokenId, price)} to escrow an NFT, while a buyer approves the marketplace for the CPT price and calls \code{buyMemo}; CPT is paid to the seller and the NFT is transferred to the buyer. The seller can cancel with \code{cancelMemoListing}.
 
 \textbf{Local verification.}
 \begin{verbatim}
@@ -30,7 +31,7 @@ npm install
 npm run compile
 npm test
 \end{verbatim}
-The test suite checks the initial treasury supply, administrator permissions, welcome points, CPT transfer, administrator CPT deduction, withdrawal burn, preservation of an already-owned NFT after withdrawal, administrator-only NFT issuance and payment burn, NFT transfer, CPT NFT purchase, listing cancellation, URI generation, and rejection of the 11th NFT.
+Remix: compile both contracts, select Remix VM, then run \code{scripts/remix-test.js}. The script uses fresh deployments and reports 22 test groups with balance, event, URI and revert checks. The local test suite also checks the initial treasury supply, administrator permissions, welcome points, CPT transfer, administrator CPT deduction, withdrawal burn, preservation of an already-owned NFT after withdrawal, administrator-only NFT issuance and payment burn, NFT transfer, CPT NFT purchase, listing cancellation, URI generation, and rejection of the 11th NFT.
 
 \textbf{Sepolia deployment (Hardhat).}
 \begin{enumerate}
@@ -39,30 +40,32 @@ The test suite checks the initial treasury supply, administrator permissions, we
 \begin{verbatim}
 export SEPOLIA_RPC_URL="<RPC URL>"
 export DEPLOYER_PRIVATE_KEY="<test-wallet private key>"
-export NFT_BASE_URI="ipfs://<CID>/"
+export NFT_IMAGE_URL="<full commit-pinned GitHub Raw image URL>"
 \end{verbatim}
   \item Run \code{npm run compile}, then \code{npm test}, then \code{npm run deploy:sepolia}.
   \item Record the printed addresses and deployment transaction hashes. Verify both addresses on \href{https://sepolia.etherscan.io}{Sepolia Etherscan}.
 \end{enumerate}
 
-\textbf{Remix + MetaMask function test.}
+\newpage
+\textbf{Remix + MetaMask function test.} Detailed steps are in \code{REMIX_DEPLOYMENT_GUIDE.md}.
 \begin{enumerate}
-  \item Open the two Solidity files in Remix, compile with Solidity 0.8.24, choose ``Injected Provider -- MetaMask'', and confirm Sepolia.
-  \item Deploy \code{CPT} with the deployer's address. Deploy \code{CampusMemo} with the CPT address and \code{ipfs://<CID>/}.
+  \item Open the two Solidity files in Remix (OpenZeppelin 5.0.2); compile with Solidity 0.8.24, optimizer 200 and EVM paris, use a supported wallet connection (or Browser Extension in Remix web), and confirm Sepolia.
+  \item Deploy \code{CPT} with the deployer's address. Deploy \code{CampusMemo} with the CPT address and the verified GitHub Raw image URL.
   \item As a student account call \code{applyForMembership}; as the administrator call \code{approveMembership(student)}. Confirm \code{isMember=true} and a 50 CPT balance.
   \item As administrator call \code{adminRecoverPoints(student, 20000000000000000000)} to recover 20 CPT. Confirm the student's balance decreases by 20, treasury balance increases by 20, and total supply and membership are unchanged. Non-admin calls must revert.
-  \item As administrator call \code{distributePoints(admin, 100 CPT)}, then CPT \code{approve(CampusMemo, 100000000000000000000)}, and CampusMemo \code{mintMemo(student)}. Confirm ordinary-member minting reverts and the administrator pays 100 CPT. Confirm \code{ownerOf(1)} and \code{tokenURI(1)}.
+  \item As administrator distribute 100 CPT to the admin account. In CPT call \code{approve} with the NFT address and amount \code{100000000000000000000}, then in CampusMemo call \code{mintMemo(student)}. Confirm ordinary-member minting reverts and the administrator pays 100 CPT. Confirm \code{ownerOf(1)} and \code{tokenURI(1)}.
   \item From the student account call \code{transfer} to another account and \code{safeTransferFrom} for token 1. Confirm both new balances/owners.
   \item As the NFT owner call \code{listMemo(1, price)}. From a buyer account approve the Campus-Memo contract to spend that CPT amount, then call \code{buyMemo(1)}. Confirm CPT reaches the seller and \code{ownerOf(1)} becomes the buyer. A seller can use \code{cancelMemoListing(1)} before purchase.
-  \item From the member account call \code{withdrawFromClub()}. Confirm the CPT balance is zero, \code{isMember=false}, the \code{MemberWithdrawn} event is emitted, and \code{ownerOf(1)} is still the former member (unless it was sold).
+  \item First return token 1 to the member. That member calls \code{withdrawFromClub()}. Confirm a zero CPT balance, \code{isMember=false}, a \code{MemberWithdrawn} event, and unchanged NFT ownership: \code{ownerOf(1)} is still the former member.
 \end{enumerate}
 
 \textbf{Final submission values.}\par
 \begin{tabularx}{\linewidth}{@{}>{\bfseries}lX@{}}
 CPT address & \placeholder{paste deployed Sepolia address}\\
 Campus-Memo address & \placeholder{paste deployed Sepolia address}\\
-NFT base URI & \placeholder{paste IPFS base URI}\\
-Example token URI & \placeholder{paste tokenURI(1) result}\\
+NFT image URL & \placeholder{paste full commit-pinned GitHub Raw image URL}\\
+Decoded token JSON & \placeholder{paste the JSON decoded from tokenURI(1)}\\
+Example token URI & \placeholder{paste complete tokenURI(1) data URI}\\
 Deployment transactions & \placeholder{paste transaction hashes or Etherscan links}
 \end{tabularx}
 
