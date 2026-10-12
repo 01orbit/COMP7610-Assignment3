@@ -4,6 +4,15 @@ cache/
 output/remix/
 coverage/
 .env
-output/pdf/*.aux
-output/pdf/*.log
-output/pdf/*.out
+
+# LaTeX intermediates; keep only report source and PDF in docs.
+*.aux
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.xdv
+*.synctex(busy)
+docs/*.log
+docs/.build/

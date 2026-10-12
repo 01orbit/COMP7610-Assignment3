@@ -1,0 +1,128 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[a4paper,left=17mm,right=17mm,top=15mm,bottom=16mm]{geometry}
+\usepackage{fontspec}
+\setmainfont{TeX Gyre Pagella}
+\setsansfont{TeX Gyre Heros}
+\setmonofont{Latin Modern Mono}[Scale=0.86]
+\usepackage{booktabs,tabularx,array,enumitem,xcolor,xurl,hyperref,fancyhdr}
+\definecolor{navy}{HTML}{17324D}
+\definecolor{teal}{HTML}{117C83}
+\definecolor{muted}{HTML}{526375}
+\hypersetup{colorlinks=true,urlcolor=teal,linkcolor=teal,pdftitle={COMP7610 Assignment 3},pdfauthor={}}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3pt}
+\setlength{\emergencystretch}{2em}
+\setlist{leftmargin=*,nosep,topsep=3pt}
+\renewcommand{\arraystretch}{1.12}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[L]{\sffamily\footnotesize\color{muted}COMP7610 Assignment 3}
+\fancyfoot[R]{\sffamily\footnotesize\color{muted}\thepage\,/\,2}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0.3pt}
+\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\sect}[2]{\par\vspace{5pt}{\sffamily\bfseries\color{navy}#1\enspace #2}\par\vspace{1pt}}
+\newcommand{\addr}[1]{\href{https://sepolia.etherscan.io/address/#1}{\texttt{#1}}}
+\newcommand{\tx}[2]{\href{https://sepolia.etherscan.io/tx/#1}{#2}}
+% Full tokenURI(1) supplied for the deployed CampusMemo contract.
+\newcommand{\SubmittedNFTURI}{data:application/json;base64,eyJuYW1lIjoiQ2FtcHVzLU1lbW8gIzEiLCJkZXNjcmlwdGlvbiI6IkEgbGltaXRlZC1lZGl0aW9uIGNvbW1lbW9yYXRpdmUgTkZUIG9mIHRoZSBIS1UgRHJvbmUgQ2x1Yi4iLCJpbWFnZSI6Imh0dHBzOi8vcmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbS8wMW9yYml0L2Ryb25lLW5mdC1waWN0dXJlLzJjMmYyYjY0YmJhY2Y5ZjIwMTIxNmQ2YThlOWVjOWU1NTdkZjY1MGYvZHJvbmUtbmZ0LnBuZyIsImF0dHJpYnV0ZXMiOlt7InRyYWl0X3R5cGUiOiJFZGl0aW9uIiwidmFsdWUiOjF9XX0=}
+\newcommand{\showNFTURI}{\if\relax\detokenize\expandafter{\SubmittedNFTURI}\relax
+  \vspace{2pt}\hrule height 0.3pt\vspace{11pt}\hrule height 0.3pt
+  \else\expandafter\nolinkurl\expandafter{\SubmittedNFTURI}\fi}
+
+\begin{document}
+{\sffamily\small\bfseries\color{teal}COMP7610\quad SMART CONTRACT LAB\quad ASSIGNMENT 3}\par
+{\sffamily\LARGE\bfseries\color{navy}HKU Drone Club on Sepolia}\par
+{\sffamily\small Ethereum Sepolia: chain ID 11155111}\par
+\vspace{3pt}{\color{navy}\hrule height 1pt}\vspace{4pt}
+
+\sect{01}{System overview and baseline requirements}
+The project combines an OpenZeppelin ERC-20 club-points token (CPT, 18 decimals) with an ERC-721 commemorative collection (Campus-Memo). Deployment creates exactly 1,000 CPT in the CPT contract treasury. Only club administrators may mint or distribute points. NFT issuance is capped at ten; each issuance burns 100 CPT from the issuing administrator. Members receive NFTs, while owners can subsequently transfer or sell them.
+
+\sect{02}{Additional functions and design decisions}
+{\small
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash\bfseries}p{32mm}X@{}}
+Membership and welcome & \code{applyForMembership} records an application; administrator-only \code{approveMembership} grants membership and transfers 5 CPT from the treasury.\\
+Voluntary withdrawal & \code{withdrawFromClub} burns the member's entire current CPT balance and revokes membership. Existing NFTs remain with their owner.\\
+Administrative burn & \code{adminBurnPoints} destroys a specified user balance amount without allowance; both the balance and total supply decrease.\\
+Treasury recovery & \code{adminRecoverPoints} returns user CPT to the treasury without allowance. Supply, membership and NFT ownership remain unchanged.\\
+CPT user actions & Standard \code{transfer}, \code{approve} and \code{transferFrom} support direct or delegated transfers, including after withdrawal. Holders can also use \code{burn} or approve \code{burnFrom}.\\
+Controlled NFT issuance & \code{mintMemo(member)} checks CPT's current administrator role and the recipient's membership. The administrator approves and pays 100 CPT; the recipient is not charged. Roles can be granted or revoked through AccessControl.\\
+NFT transfers and sales & Standard ERC-721 transfers and owner-approved delegation (\code{approve} / \code{setApprovalForAll}) remain available. \code{listMemo} escrows an NFT; \code{cancelMemoListing} returns it; \code{buyMemo} transfers approved CPT to the seller and the NFT to the buyer. Former members may still trade.\\
+Stable metadata & \code{tokenURI(id)} generates Base64 JSON on-chain with a numbered name and Edition attribute. One fixed GitHub image is shared; transfers and withdrawal do not alter metadata. No NFT burn or administrator recovery exists.\\
+\end{tabularx}}
+
+\sect{03}{Deployment identifiers and public source}
+All addresses below link directly to Sepolia Etherscan. T and N denote the deployed contracts; A, B and C denote the test participants.\par
+{\small
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash\bfseries}p{32mm}X@{}}
+T: CPT & \addr{0x2cfc2b3Ed989ef5bA52E586dbcB5A0D8556d96C9}\\
+N: CampusMemo & \addr{0x85C5E2da4e940420f3a429D482C22763345e16b9}\\
+A: administrator & \addr{0x861BCc126C001A3313F58436c7629a1B168883aE}\\
+B: member / seller & \addr{0x136bD9945a73Ba50A060Ea4362f33ede7727332d}\\
+C: member / buyer & \addr{0xa66AebD84583dc72F4803c22EbC4fB34b1908144}\\
+\end{tabularx}}
+\textbf{Open-source code repository:} \url{https://github.com/01orbit/COMP7610-Assignment3}\par
+{\raggedright\footnotesize\textbf{Image (fixed commit):} \url{https://raw.githubusercontent.com/01orbit/drone-nft-picture/2c2f2b64bbacf9f201216d6a8e9ec9e557df650f/drone-nft.png}\par}
+
+\sect{04}{Deployment procedure and creation evidence}
+\begin{enumerate}[label=\arabic*.,itemsep=1pt]
+\item Publish the image above, then prepare Remix copies with \code{npm run remix:prepare}. Compile CPT and CampusMemo in web Remix: Solidity 0.8.24, OpenZeppelin 5.0.2, optimizer 200 runs, EVM paris; enable Generate contract metadata.
+\item Select Remix VM and run \code{scripts/remix-test.js} for the full functional checks. Switch to Browser Extension / MetaMask, connect A on Sepolia, and keep transaction Value at zero.
+\item Deploy CPT with \code{initialAdmin=A}: \tx{0xefd25c936046bf9a650159005dc661d5f8e1e485f2e0e2d9ea2fa9e6143169cc}{CPT creation transaction}. Deploy CampusMemo with T and the fixed image URL: \tx{0xa2b5438f12dfd24ebd6a5f94fa869a77e58a4e3387f34b2c46f52a2b70cfd0c8}{CampusMemo creation transaction}. Each linked receipt identifies A as creator and T or N as the created contract.
+\item Initial reads: \code{balanceOf(T)=totalSupply()=1000 CPT}, \code{WELCOME_POINTS()=5 CPT}; N links to T, costs 100 CPT per mint, caps supply at 10 and initially has no NFTs. The Sepolia checker \code{scripts/remix-sepolia-check.js} in \code{initial} mode confirms these values without sending transactions.
+\end{enumerate}
+
+\newpage
+{\sffamily\large\bfseries\color{navy}Sepolia verification walkthrough}\par
+{\small Use the linked addresses on page 1 to locate transactions to T or N, ordered by block and transaction index. Open each receipt; check Success, From, To, Input Data and Logs. Values below are in whole CPT; in calldata, $u=10^{18}$ base units (e.g. 80 CPT = \code{80e18} in Remix).}
+
+\sect{05}{Function-test sequence and verification checkpoints}
+{\small
+\begin{tabularx}{\linewidth}{@{}p{9mm}p{65mm}X@{}}
+\toprule
+\textbf{Step} & \textbf{Sender, contract and call} & \textbf{Evidence to check in receipt / state}\\
+\midrule
+1 & B: \code{T.applyForMembership()};\newline A: \code{T.approveMembership(B)} & Application then approval events; treasury transfers 5 CPT to B. B becomes a member; treasury 995.\\
+2 & C: \code{T.applyForMembership()};\newline A: \code{T.approveMembership(C)} & C receives 5 CPT and membership; treasury 990; total supply still 1,000.\\
+3 & A: \code{T.adminRecoverPoints(B, 2u)} & \code{PointsRecoveredByAdmin}; transfer B to T of 2 CPT. B 3; treasury 992; supply unchanged.\\
+4 & A: \code{T.distributePoints(A, 100u)} & Transfer T to A of 100 CPT; A 100; treasury 892.\\
+5 & A: \code{T.approve(N, 100u)} & \code{Approval(A,N,100u)}; no balance change.\\
+6 & A: \code{N.mintMemo(B)} & CPT burn A to zero of 100; NFT mint zero to B, ID 1; \code{MemoMinted}. A 0; B 3; supply 900.\\
+7 & B: \code{T.transfer(C, 1u)} & Transfer B to C of 1 CPT; B 2; C 6.\\
+8 & A: \code{T.distributePoints(C, 74u)} & Transfer T to C of 74 CPT; C 80; treasury 818.\\
+9 & B: \code{N.listMemo(1, 80u)} & \code{MemoListed}; NFT moves B to N (escrow), price 80 CPT.\\
+10 & B: \code{N.cancelMemoListing(1)} & \code{MemoListingCancelled}; NFT returns N to B; listing cleared.\\
+11 & B: \code{N.listMemo(1, 80u)} & NFT moves B to N again; seller B, price 80 CPT.\\
+12 & C: \code{T.approve(N, 80u)} & \code{Approval(C,N,80u)}; no payment yet.\\
+13 & C: \code{N.buyMemo(1)} & \code{MemoPurchased}; CPT transfer C to B of 80; NFT N to C; listing cleared. B 82; C 0.\\
+14 & C: \code{N.safeTransferFrom(C, B, 1)} & ERC-721 \code{Transfer}: C to B, ID 1; CPT balances unchanged.\\
+15 & B: \code{T.withdrawFromClub()} & CPT burn B to zero of 82; \code{MemberWithdrawn}; B no longer a member. NFT stays with B.\\
+\bottomrule
+\end{tabularx}}
+
+\sect{06}{How to verify without changing the contracts}
+{\small
+\textbf{Historical evidence.} In T/N's Transactions tabs, match sender and function above, then inspect Logs. For \code{Transfer} logs, indexed topics 1/2 are from/to addresses: T stores the CPT amount in Data, whereas N stores the NFT ID in topic 3. Decode hex integers; divide CPT amounts by $10^{18}$. A burn uses the zero address as recipient; the NFT mint uses it as sender. Failed simulations and read-only calls do not create receipts. The administrator-burn function and rejected permission / cap cases are covered by source and VM tests, rather than this Sepolia demonstration sequence.
+
+\textbf{Read-interface availability.} If source verification is pending, Etherscan shows bytecode without a verified Read Contract interface. Transaction inputs and logs remain public; decode them with the submitted contract ABI. After source verification, use Contract $\rightarrow$ Read Contract for the queries below. Alternatively compile the submitted source in Remix, load T/N using At Address, connect Sepolia, and perform only read calls. No administrator key is needed for reads.
+
+\textbf{Final checks.} After exactly steps 1--15, \code{T.totalSupply()} and \code{T.balanceOf(T)} should each be 818 CPT; A/B/C each hold zero CPT. \code{T.isMember(B)=false}, \code{T.isMember(C)=true}, \code{N.totalMinted()=1}, \code{N.ownerOf(1)=B}, and \code{N.listings(1)} is cleared. Run \code{scripts/remix-sepolia-check.js} with the page-1 addresses, image URL and \code{stage: "after-demo"} for a read-only block snapshot. Use \code{inspect} if subsequent transactions changed the state.
+
+\textbf{Metadata check.} Read \code{N.tokenURI(1)} and decode its Base64 JSON: name \code{Campus-Memo #1}, Edition 1, and the page-1 image URL. Ownership changes and membership withdrawal leave that URI unchanged. The complete URI for token 1 is reproduced below.
+}
+
+{\footnotesize\textbf{When Input Data is not decoded:} the first four bytes identify the method; subsequent ABI words contain the arguments. Match these selectors with the calls on page 2:\par
+\begin{tabularx}{\linewidth}{@{}XlXl@{}}
+\code{applyForMembership} & \code{5e1ee52a} & \code{approveMembership} & \code{79a68cf1}\\
+\code{adminRecoverPoints} & \code{6f1fa741} & \code{distributePoints} & \code{51a40e96}\\
+\code{approve} & \code{095ea7b3} & \code{mintMemo} & \code{a932e4eb}\\
+\code{transfer} & \code{a9059cbb} & \code{listMemo} & \code{b206477e}\\
+\code{cancelMemoListing} & \code{a595af6a} & \code{buyMemo} & \code{88d7d663}\\
+\code{safeTransferFrom} (3 args) & \code{42842e0e} & \code{withdrawFromClub} & \code{aa5ae8b7}
+\end{tabularx}}
+
+
+\sect{07}{NFT URI (token 1)}
+{\footnotesize\showNFTURI}
+\end{document}

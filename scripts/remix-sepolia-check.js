@@ -1,20 +1,21 @@
 /*
  * Read-only check for EXISTING Sepolia contracts. No deployments, signing,
  * approvals, transfers, mints or withdrawals are performed by this script.
- * In Remix: fill CONFIG, choose Browser Extension -> MetaMask -> Sepolia,
+ * CONFIG is prefilled for the submitted deployment. In Remix, choose
+ * Browser Extension -> MetaMask -> Sepolia,
  * then right-click this file -> Run. ABI fragments below only contain reads.
  */
 const CONFIG = {
-  cptAddress: "REPLACE_WITH_CPT_ADDRESS",
-  nftAddress: "REPLACE_WITH_CAMPUSMEMO_ADDRESS",
-  adminAddress: "REPLACE_WITH_ACCOUNT_A_ADDRESS",
-  imageURI: "REPLACE_WITH_FULL_COMMIT_PINNED_GITHUB_RAW_IMAGE_URL",
+  cptAddress: "0x2cfc2b3Ed989ef5bA52E586dbcB5A0D8556d96C9",
+  nftAddress: "0x85C5E2da4e940420f3a429D482C22763345e16b9",
+  adminAddress: "0x861BCc126C001A3313F58436c7629a1B168883aE",
+  imageURI: "https://raw.githubusercontent.com/01orbit/drone-nft-picture/2c2f2b64bbacf9f201216d6a8e9ec9e557df650f/drone-nft.png",
   // "initial": immediately after deployment, before any transactions.
   // "inspect": inspect the current state without assuming balances.
   // "after-demo": after the EXACT sequence in REMIX_DEPLOYMENT_GUIDE.md.
-  stage: "initial",
-  memberAddress: "", // Account B; required only for after-demo.
-  buyerAddress: ""   // Account C; required only for after-demo.
+  stage: "inspect", // The submitted contracts have already completed the demo.
+  memberAddress: "0x136bD9945a73Ba50A060Ea4362f33ede7727332d", // Account B.
+  buyerAddress: "0xa66AebD84583dc72F4803c22EbC4fB34b1908144"   // Account C.
 };
 
 const CPT_READ_ABI = [

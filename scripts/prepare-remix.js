@@ -17,4 +17,4 @@ for (const file of files) {
   fs.writeFileSync(target, content);
 }
 console.log(`Prepared ${output}: version-pinned contracts, the VM test script and the Sepolia read-only checker.`);
-console.log("Full tests: Remix VM + scripts/remix-test.js. Existing Sepolia contracts: fill CONFIG in scripts/remix-sepolia-check.js.");
+console.log("Full tests: Remix VM + scripts/remix-test.js. Submitted Sepolia contracts: run scripts/remix-sepolia-check.js (CONFIG prefilled, inspect mode).");

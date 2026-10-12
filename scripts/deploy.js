@@ -1,10 +1,9 @@
 const hre = require("hardhat");
 
 async function main() {
-  const imageURI = process.env.NFT_IMAGE_URL;
-  if (!imageURI) {
-    throw new Error("Set NFT_IMAGE_URL to the raw URL of the committed NFT image before deployment.");
-  }
+  // Use the submitted image by default; NFT_IMAGE_URL can override it for a new deployment.
+  const imageURI = process.env.NFT_IMAGE_URL ||
+    "https://raw.githubusercontent.com/01orbit/drone-nft-picture/2c2f2b64bbacf9f201216d6a8e9ec9e557df650f/drone-nft.png";
   // Match the on-chain JSON character rules before deploying even CPT.
   if (/[^\x21-\x7e]|["\\]/.test(imageURI)) {
     throw new Error("NFT_IMAGE_URL contains spaces or characters that cannot be embedded in JSON; use a percent-encoded raw URL.");
